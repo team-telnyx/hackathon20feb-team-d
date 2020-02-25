@@ -1,0 +1,39 @@
+//For Heroku deploy
+{
+    "name": "Telnyx SMS Chat App",
+    "description": "This app allows you to demo P2P SMS via Telnyx API.",
+    "keywords": [
+      "Telnyx",
+      "SMS",
+      "Chat"
+    ],
+    "website": "https://small-sharp-tool.com/",
+    "repository": "https://github.com/jane-doe/small-sharp-tool",
+    "logo": "https://small-sharp-tool.com/logo.svg",
+    "success_url": "/welcome",
+    "scripts": {
+      "postdeploy": "bundle exec rake bootstrap"
+    },
+    "env": {
+      "REACT_APP_TELNYX_API_KEY": {
+        "description": "Your Telnyx API Key",
+        "value": "secret"
+      },
+      "REACT_APP_TELNYX_SMS_DID": {
+        "description": "Your Telnyx DID configured to the messaging profile",
+        "value": "secret"
+      },
+      "REACT_APP_MOBILE_DID": {
+        "description": "The Mobile Number you want to send and receive SMS",
+        "value": "secret"
+      }
+    },
+    "image": "heroku/node",
+    "environments": {
+      "test": {
+        "scripts": {
+          "test": "bundle exec rake test"
+        }
+      }
+    }
+  }
