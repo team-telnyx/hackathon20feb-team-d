@@ -16,67 +16,66 @@ const fromDID = process.env.REACT_APP_TELNYX_SMS_DID;
 const toDID = process.env.REACT_APP_MOBILE_DID;
 
 class App extends Component {
-	constructor() {
-		super();
-		this.state = {
-			endpoint: "http://localhost:8089",
-			recMessage: ""
-		};
-	}
+  constructor() {
+    super();
+    this.state = {
+      endpoint: "http://localhost:8089",
+      recMessage: ""
+    };
+  }
 
-	componentDidMount() {
-		// Load a message so we know the ap has loaded
-		addResponseMessage("Received sms");
-		// Will keep the widget from minimizing to bottom right of screen
-		toggleWidget();
-		
-	}
-	// Send SMS to User from Web - Details found in Telnyx API Documentation
-	handleNewUserMessage = newMessage => {
-		console.log(`SMS SENT! ${newMessage}`);
-		// Now send the message throught the backend API
-		axios({
-			method: "post",
-			url: "https://api.telnyx.com/v2/messages",
-			headers: {
-				"Content-Type": "application/json",
-				Accept: "application/json",
-				Authorization: `Bearer ${apiKey}`
-			},
-			data: {
-				from: fromDID,
-				to: toDID,
-				text: newMessage
-				// subject: "+19842990505 ProspectA",
-				// media_urls: [
-				// 	{"image/jpeg":"https://www.dropbox.com/s/vlv7kr51nssqily/logo192.png"}
-				// ]
-			}
-		}).then(res => console.log(res));
-	};
+  componentDidMount() {
+    // Load a message so we know the ap has loaded
+    addResponseMessage("Ready to chat!");
+    // Will keep the widget from minimizing to bottom right of screen
+    toggleWidget();
+  }
+  // Send SMS to User from Web - https://developers.telnyx.com/docs/api/v2/messaging/Messages#createMessage
+  handleNewUserMessage = newMessage => {
+    console.log(`SMS SENT! ${newMessage}`);
+    // Now send the message throught the backend API
+    axios({
+      method: "post",
+      url: "https://api.telnyx.com/v2/messages",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: `Bearer ${apiKey}`
+      },
+      data: {
+        from: fromDID,
+        to: toDID,
+        // text: newMessage,
+        subject: "+19842990505",
+        media_urls: [
+          "https://www.dropbox.com/s/vlv7kr51nssqily/logo192.png?dl=0"
+        ]
+      }
+    }).then(res => console.log(res));
+  };
 
-	render() {
-		// Socket IO configuration
-		// Connect to backend over websockets port 8089
-		const socket = io.connect(this.state.endpoint);
-		// Listening for events from backend endpoint which recieves webhooks from Telnyx
-		socket.on("sms msg", msg => {
-			// react-chat-widget method employed to post recieved SMS to DOM
-			addResponseMessage(msg.msgBody);
-			console.log(`SMS Received: ${msg.msgBody} from: ${msg.msgFrom}`);
-		});
+  render() {
+    // Socket IO configuration
+    // Connect to backend over websockets port 8089
+    const socket = io.connect(this.state.endpoint);
+    // Listening for events from backend endpoint which recieves webhooks from Telnyx
+    socket.on("sms msg", msg => {
+      // react-chat-widget method employed to post recieved SMS to DOM
+      addResponseMessage(msg.msgBody);
+      console.log(`SMS Received: ${msg.msgBody} from: ${msg.msgFrom}`);
+    });
 
-		return (
-			<div className="App">
-				<Widget
-					handleNewUserMessage={this.handleNewUserMessage}
-					profileAvatar={logo}
-					title="Telnyx SMS P2P Demo"
-					subtitle="Let's Chat"
-				/>
-			</div>
-		);
-	}
+    return (
+      <div className="App">
+        <Widget
+          handleNewUserMessage={this.handleNewUserMessage}
+          profileAvatar={logo}
+          title="Telnyx SMS P2P Demo"
+          subtitle="Let's Chat"
+        />
+      </div>
+    );
+  }
 }
 
 export default App;
