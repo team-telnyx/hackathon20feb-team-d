@@ -8,13 +8,6 @@ import axios from "axios";
 // Socket.io client for React
 import io from "socket.io-client";
 
-// Your Telnyx API V2 Key
-const apiKey = process.env.REACT_APP_TELNYX_API_KEY;
-// Your Telnyx DID configured to the messaging profile
-const fromDID = process.env.REACT_APP_TELNYX_SMS_DID;
-// The Mobile Number you want to send and receive SMS'
-const toDID = process.env.REACT_APP_MOBILE_DID;
-
 class App extends Component {
   constructor() {
     super();
@@ -36,22 +29,11 @@ class App extends Component {
     // Now send the message throught the backend API
     axios({
       method: "post",
-      url: "https://api.telnyx.com/v2/messages",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        Authorization: `Bearer ${apiKey}`
-      },
+      url: "/messages",
       data: {
-        from: fromDID,
-        to: toDID,
-        text: newMessage,
-        subject: "+19842990505",
-        media_urls: [
-          "https://www.dropbox.com/s/vlv7kr51nssqily/logo192.png?dl=0"
-        ]
+        text: newMessage
       }
-    }).then(res => console.log(res));
+    }).then(response => console.log(response));
   };
 
   render() {

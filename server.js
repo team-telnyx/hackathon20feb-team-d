@@ -5,8 +5,18 @@ const app = express();
 const server = require("http").Server(app);
 // WebSockets communicating over port 8089
 const io = require("socket.io")(8089);
+
 require("dotenv").config();
 require("path");
+
+// Your Telnyx API V2 Key
+const apiKey = process.env.TELNYX_API_KEY;
+// Your Telnyx DID configured to the messaging profile
+const fromDID = process.env.TELNYX_SMS_DID;
+// The Mobile Number you want to send and receive SMS'
+const toDID = process.env.MOBILE_DID;
+
+const telnyx = require("telnyx")(apiKey);
 
 // Init Middleware
 app.use(express.json({ extended: false }));
@@ -32,6 +42,42 @@ io.on("connection", socket => {
 // Simple Get Route so we know API backend is Live
 app.get("/api-test", (req, res) => {
   res.send(`<h1>SMS Chat API UP</h1>`);
+});
+
+app.post("/messages", (req, res) => {
+  // Now send the message throught the backend API
+
+  telnyx.messages
+    .create({
+      from: fromDID,
+      to: toDID,
+      text: req.body.text
+    })
+    .then(response => {
+      res.send(response);
+    });
+
+  // axios({
+  //   method: "post",
+  //   url: "https://api.telnyx.com/v2/messages",
+  //   headers: {
+  //     "Content-Type": "application/json",
+  //     Accept: "application/json",
+  //     Authorization: `Bearer ${apiKey}`
+  //   },
+  //   data: {
+  //     from: fromDID,
+  //     to: toDID,
+  //     text: req.body.text
+  //   }
+  // })
+  //   .then(response => {
+  //     res.send(response);
+  //   })
+  //   .catch(errors => {
+  //     res.send(errors);
+  //     res.end();
+  //   });
 });
 
 // Recieve Webhooks from Telnyx
