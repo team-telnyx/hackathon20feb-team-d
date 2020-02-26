@@ -36,5 +36,5 @@
     ]
   },
   "proxy": "http://localhost:5000",
-  "homepage": "http://3.15.39.112/"
+  "homepage": "http://ec2-3-15-39-112.us-east-2.compute.amazonaws.com/"
 }
