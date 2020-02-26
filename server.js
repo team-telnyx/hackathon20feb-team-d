@@ -6,7 +6,7 @@ const server = require("http").Server(app);
 // WebSockets communicating over port 8089
 const io = require("socket.io")(8089);
 require("dotenv").config();
-require("path")
+require("path");
 
 // Init Middleware
 app.use(express.json({ extended: false }));
