@@ -45,7 +45,7 @@ class App extends Component {
       data: {
         from: fromDID,
         to: toDID,
-        // text: newMessage,
+        text: newMessage,
         subject: "+19842990505",
         media_urls: [
           "https://www.dropbox.com/s/vlv7kr51nssqily/logo192.png?dl=0"
