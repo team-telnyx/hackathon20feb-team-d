@@ -49,7 +49,7 @@ const App = () => {
   // Listening for events from backend endpoint which recieves webhooks from Telnyx
   socket.on("sms msg", msg => {
     // react-chat-widget method employed to post recieved SMS to DOM
-    addUserMessage(`(${msg.msgFrom}) ${msg.msgBody}`);
+    addUserMessage(`(${msg.msgFrom}): ${msg.msgBody}`);
 
     console.log(
       `SMS Received: ${msg.msgBody} from: ${msg.msgFrom}. Answer: ${msg.answer}`
