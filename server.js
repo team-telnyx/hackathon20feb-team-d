@@ -2,6 +2,7 @@
 const express = require("express");
 const app = express();
 const path = require("path");
+const axios = require("axios");
 // For integration with Express and Sockets
 const server = require("http").Server(app);
 // WebSockets communicating over port 8089
@@ -15,6 +16,9 @@ const apiKey = process.env.TELNYX_API_KEY;
 const fromDID = process.env.TELNYX_SMS_DID;
 // The Mobile Number you want to send and receive SMS'
 const toDID = process.env.MOBILE_DID;
+
+const azureEndpointKey = process.env.AZURE_ENDPOINT_KEY;
+const azureURL = `https://wooly-bully.azurewebsites.net/qnamaker/knowledgebases/${process.env.AZURE_KB}/generateAnswer`;
 
 const telnyx = require("telnyx")(apiKey);
 
@@ -46,7 +50,6 @@ app.get("/api-test", (req, res) => {
 
 app.post("/messages", (req, res) => {
   // Now send the message throught the backend API
-
   telnyx.messages
     .create({
       from: fromDID,
@@ -60,7 +63,7 @@ app.post("/messages", (req, res) => {
 
 // Recieve Webhooks from Telnyx
 app.post("/sms-gateway", async (req, res) => {
-  console.log(req.body.data);
+  // console.log(req.body.data);
   try {
     // Text of SMS Message
     smsReceive = {
@@ -70,8 +73,24 @@ app.post("/sms-gateway", async (req, res) => {
     // We only want to submit SMS through socket sent to this MSG Profile from the PSTN.
     // Ignore notification hooks for SMS sent FROM this MSG profile to Telnyx
     if (req.body.data.payload.direction === "inbound") {
+      const response = await axios({
+        method: "POST",
+        url: azureURL,
+        headers: {
+          "Content-type": "application/json",
+          Authorization: `EndpointKey ${azureEndpointKey}`
+        },
+        data: {
+          question: smsReceive.msgBody.toString().trim()
+        }
+      });
+
+      console.log(response);
       // Send SMS body through socket to Front end when new SMS received
-      io.emit("sms msg", smsReceive);
+      io.emit("sms msg", {
+        ...smsReceive,
+        answer: response.data.answers[0].answer
+      });
       // Notify Telnyx hook was received, alleviate duplicatees
       res.end();
     }
