@@ -5,11 +5,15 @@ import App from "./App";
 import * as serviceWorker from "./serviceWorker";
 
 import { positions, Provider as AlertProvider } from "react-alert";
-import AlertTemplate from "react-alert-template-basic";
 const options = {
-  timeout: 250000,
-  position: positions.TOP_RIGHT
+  timeout: 25000,
+  position: positions.TOP_RIGHT,
+  containerStyle: {}
 };
+
+const AlertTemplate = ({ style, options, message }) => (
+  <div style={style}>{message}</div>
+);
 
 ReactDOM.render(
   <AlertProvider template={AlertTemplate} {...options}>

@@ -53,7 +53,7 @@ app.post("/messages", (req, res) => {
   telnyx.messages
     .create({
       from: fromDID,
-      to: toDID,
+      to: req.body.to || toDID,
       text: req.body.text
     })
     .then(response => {
