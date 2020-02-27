@@ -1,13 +1,13 @@
 // Dependencies
 const express = require("express");
 const app = express();
+const path = require("path");
 // For integration with Express and Sockets
 const server = require("http").Server(app);
 // WebSockets communicating over port 8089
 const io = require("socket.io")(8089);
 
 require("dotenv").config();
-require("path");
 
 // Your Telnyx API V2 Key
 const apiKey = process.env.TELNYX_API_KEY;
@@ -26,7 +26,7 @@ if (process.env.NODE_ENV === "production") {
   // Set Static folder
   app.use(express.static("client/build"));
 
-  app.get("*", (req, res) => {
+  app.get("/", (req, res) => {
     res.sendFile(path.resolve(__dirname, "client", "build", "index.html"));
   });
 }
@@ -56,28 +56,6 @@ app.post("/messages", (req, res) => {
     .then(response => {
       res.send(response);
     });
-
-  // axios({
-  //   method: "post",
-  //   url: "https://api.telnyx.com/v2/messages",
-  //   headers: {
-  //     "Content-Type": "application/json",
-  //     Accept: "application/json",
-  //     Authorization: `Bearer ${apiKey}`
-  //   },
-  //   data: {
-  //     from: fromDID,
-  //     to: toDID,
-  //     text: req.body.text
-  //   }
-  // })
-  //   .then(response => {
-  //     res.send(response);
-  //   })
-  //   .catch(errors => {
-  //     res.send(errors);
-  //     res.end();
-  //   });
 });
 
 // Recieve Webhooks from Telnyx
