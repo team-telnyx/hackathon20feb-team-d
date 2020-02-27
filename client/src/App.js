@@ -93,8 +93,8 @@ const App = () => {
       <Widget
         handleNewUserMessage={sendAPIMessageToUser}
         profileAvatar={logo}
-        title="Telnyx SMS P2P Demo"
-        subtitle="Let's Chat"
+        title="SMS Preservation Society"
+        subtitle="Powered by Telnyx and Azure QandA"
       />
     </div>
   );
