@@ -85,12 +85,9 @@ app.post("/sms-gateway", async (req, res) => {
         }
       });
 
-      console.log(response);
+      smsReceive.answer = response.data.answers[0].answer;
       // Send SMS body through socket to Front end when new SMS received
-      io.emit("sms msg", {
-        ...smsReceive,
-        answer: response.data.answers[0].answer
-      });
+      io.emit("sms msg", smsReceive);
       // Notify Telnyx hook was received, alleviate duplicatees
       res.end();
     }
