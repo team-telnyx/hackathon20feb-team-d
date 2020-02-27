@@ -27,86 +27,86 @@ app.use(express.json({ extended: false }));
 
 // Serve static assets in production
 if (process.env.NODE_ENV === "production") {
-	// Set Static folder
-	app.use(express.static("client/build"));
+  // Set Static folder
+  app.use(express.static("client/build"));
 
-	app.get("/", (req, res) => {
-		res.sendFile(path.resolve(__dirname, "client", "build", "index.html"));
-	});
+  app.get("/", (req, res) => {
+    res.sendFile(path.resolve(__dirname, "client", "build", "index.html"));
+  });
 }
 
 const PORT = process.env.PORT || 8080;
 
 // Init Socket.IO
 io.on("connection", socket => {
-	// Console log if there is a successful connection
-	console.log("connected to front end");
+  // Console log if there is a successful connection
+  console.log("connected to front end");
 });
 
 // Simple Get Route so we know API backend is Live
 app.get("/api-test", (req, res) => {
-	res.send(`<h1>SMS Chat API UP</h1>`);
+  res.send(`<h1>SMS Chat API UP</h1>`);
 });
 
 app.post("/messages", (req, res) => {
-	// Now send the message throught the backend API
-	telnyx.messages
-		.create({
-			from: fromDID,
-			to: req.body.to || toDID,
-			text: req.body.text
-		})
-		.then(response => {
-			res.send(response);
-		});
+  // Now send the message throught the backend API
+  telnyx.messages
+    .create({
+      from: fromDID,
+      to: req.body.to || toDID,
+      text: req.body.text
+    })
+    .then(response => {
+      res.send(response);
+    });
 });
 
 // Recieve Webhooks from Telnyx
 app.post("/sms-gateway", async (req, res) => {
-	// console.log(req.body.data);
-	try {
-		// Text of SMS Message
-		smsReceive = {
-			msgBody: req.body.data.payload.text,
-			msgFrom: req.body.data.payload.from.phone_number
-		};
-		// We only want to submit SMS through socket sent to this MSG Profile from the PSTN.
-		// Ignore notification hooks for SMS sent FROM this MSG profile to Telnyx
-		if (req.body.data.payload.direction === "inbound") {
-			const response = await axios({
-				method: "POST",
-				url: azureURL,
-				headers: {
-					"Content-type": "application/json",
-					Authorization: `EndpointKey ${azureEndpointKey}`
-				},
-				data: {
-					question: smsReceive.msgBody.toString().trim()
-				}
-			});
+  // console.log(req.body.data);
+  try {
+    // Text of SMS Message
+    smsReceive = {
+      msgBody: req.body.data.payload.text,
+      msgFrom: req.body.data.payload.from.phone_number
+    };
+    // We only want to submit SMS through socket sent to this MSG Profile from the PSTN.
+    // Ignore notification hooks for SMS sent FROM this MSG profile to Telnyx
+    if (req.body.data.payload.direction === "inbound") {
+      const response = await axios({
+        method: "POST",
+        url: azureURL,
+        headers: {
+          "Content-type": "application/json",
+          Authorization: `EndpointKey ${azureEndpointKey}`
+        },
+        data: {
+          question: smsReceive.msgBody.toString().trim()
+        }
+      });
 
-			smsReceive.answer = response.data.answers[0].answer;
-			// Send SMS body through socket to Front end when new SMS received
-			io.emit("sms msg", smsReceive);
-			// Notify Telnyx hook was received, alleviate duplicatees
-			res.end();
+      smsReceive.answer = response.data.answers[0].answer;
+      // Send SMS body through socket to Front end when new SMS received
+      io.emit("sms msg", smsReceive);
+      // Notify Telnyx hook was received, alleviate duplicatees
+      res.end();
 
-			telnyx.messages
-				.create({
-					from: process.env.TELNYX_SMS_DID,
-					to: smsReceive.msgFrom,
-					text: smsReceive.answer
-				})
-				.then(response => {
-					res.send(response);
-				});
-		}
+      telnyx.messages
+        .create({
+          from: process.env.TELNYX_SMS_DID,
+          to: smsReceive.msgFrom,
+          text: smsReceive.answer
+        })
+        .then(response => {
+          res.send(response);
+        });
+    }
 
-		res.end();
-	} catch (error) {
-		// Log any Errors
-		console.error(error);
-	}
+    res.end();
+  } catch (error) {
+    // Log any Errors
+    console.error(error);
+  }
 });
 
 server.listen(PORT, () => console.log(`Server started on port ${PORT}`));
