@@ -90,16 +90,6 @@ app.post("/sms-gateway", async (req, res) => {
       io.emit("sms msg", smsReceive);
       // Notify Telnyx hook was received, alleviate duplicatees
       res.end();
-
-      telnyx.messages
-        .create({
-          from: process.env.TELNYX_SMS_DID,
-          to: smsReceive.msgFrom,
-          text: smsReceive.answer
-        })
-        .then(response => {
-          res.send(response);
-        });
     }
 
     res.end();
